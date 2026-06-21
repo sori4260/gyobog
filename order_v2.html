@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>교복 주문입력 시스템</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:#f0f2f5;height:100vh;overflow:hidden;}
+.topbar{background:#1F4E79;color:#fff;padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:44px;}
+.topbar h1{font-size:15px;font-weight:600;}
+.topbar .clock{font-size:12px;opacity:0.8;}
+.main{display:grid;grid-template-columns:270px 1fr 220px;gap:8px;padding:8px;height:calc(100vh - 44px);}
+.col{display:flex;flex-direction:column;gap:8px;overflow-y:auto;}
+.card{background:#fff;border-radius:8px;padding:12px;border:0.5px solid #ddd;flex-shrink:0;}
+.card-title{font-size:11px;font-weight:700;color:#999;margin-bottom:8px;letter-spacing:0.5px;text-transform:uppercase;}
+label{font-size:11px;color:#888;display:block;margin-bottom:3px;}
+input[type=text],input[type=tel],input[type=number],select{width:100%;height:30px;border:1px solid #ddd;border-radius:5px;padding:0 8px;font-size:13px;background:#fff;}
+input:focus,select:focus{outline:none;border-color:#1F4E79;}
+.field{margin-bottom:8px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.regnum{background:#E6F1FB;border-radius:6px;padding:8px;text-align:center;font-size:22px;font-weight:700;color:#1F4E79;letter-spacing:3px;margin-bottom:8px;}
+.btn{height:30px;border:1px solid #ddd;border-radius:5px;padding:0 12px;font-size:12px;cursor:pointer;background:#fff;transition:0.1s;}
+.btn:hover{filter:brightness(0.95);}
+.btn-blue{background:#1F4E79;color:#fff;border-color:#1F4E79;}
+.btn-green{background:#375623;color:#fff;border-color:#375623;}
+.btn-red{background:#C00000;color:#fff;border-color:#C00000;}
+.btn-orange{background:#C55A11;color:#fff;border-color:#C55A11;}
+.btn-gray{background:#595959;color:#fff;border-color:#595959;}
+.btn-sm{height:24px;font-size:11px;padding:0 7px;}
+.support-wrap{display:flex;gap:4px;}
+.support-btn{flex:1;height:28px;border:1.5px solid #ddd;border-radius:5px;font-size:11px;cursor:pointer;background:#fff;font-weight:600;}
+.s-hyunmul{background:#1F4E79;color:#fff;border-color:#1F4E79;}
+.s-hyungum{background:#375623;color:#fff;border-color:#375623;}
+.s-ilban{background:#C55A11;color:#fff;border-color:#C55A11;}
+.action-bar{background:#fff;border-radius:8px;padding:8px 12px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;flex-shrink:0;}
+.items-wrap{background:#fff;border-radius:8px;padding:12px;flex:1;overflow-y:auto;min-height:0;}
+.item-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.item-tbl th{background:#f5f5f5;padding:5px 6px;text-align:left;font-size:11px;color:#666;font-weight:600;white-space:nowrap;}
+.item-tbl td{padding:6px 6px;border-bottom:1px solid #f5f5f5;vertical-align:middle;}
+.item-tbl tr:hover td{background:#f9f9f9;cursor:pointer;}
+.item-tbl tr.sel td{background:#E6F1FB;}
+.stag{font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600;display:inline-block;white-space:nowrap;}
+.dong{background:#DAEEF3;color:#0C447C;}
+.ha{background:#FCE4D6;color:#993C1D;}
+.repair-txt{color:#C00000;font-size:10px;}
+.calc-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid #f5f5f5;}
+.pay-wrap{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;}
+.pay-btn{padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:11px;cursor:pointer;background:#fff;}
+.pay-btn.on{background:#1F4E79;color:#fff;border-color:#1F4E79;}
+.bpay-btn{padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:11px;cursor:pointer;background:#fff;}
+.bpay-btn.on{background:#375623;color:#fff;border-color:#375623;}
+.recent-item{padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:11px;}
+.rn{font-weight:700;color:#1F4E79;}
+.ri{color:#999;font-size:10px;}
+/* 팝업 공통 */
+.popup-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:200;}
+.popup{background:#fff;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;}
+.ph{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
+.ph h2{font-size:14px;font-weight:600;color:#fff;}
+.ph small{font-size:11px;color:rgba(255,255,255,0.8);}
+.pb{padding:14px;overflow-y:auto;}
+.pf{padding:10px 14px;border-top:1px solid #eee;display:flex;gap:8px;}
+/* 사이즈 팝업 */
+.sz-popup{width:440px;max-height:88vh;}
+.sz-popup .ph{background:#1F4E79;}
+.itembig{font-size:19px;font-weight:700;color:#1F4E79;margin-bottom:2px;}
+.itemsub{font-size:12px;color:#888;margin-bottom:12px;}
+.sz-grid{display:flex;flex-wrap:wrap;gap:6px;}
+.sz-btn{width:56px;padding:8px 0;border:1.5px solid #ddd;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;background:#fff;text-align:center;}
+.sz-btn:hover{border-color:#1F4E79;background:#E6F1FB;color:#1F4E79;}
+.sz-btn.sel{background:#1F4E79;color:#fff;border-color:#1F4E79;}
+.alt-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.alt-btn{padding:6px 12px;border:1.5px solid #ddd;border-radius:6px;font-size:12px;cursor:pointer;background:#fff;font-weight:600;}
+.alt-btn.on{background:#375623;color:#fff;border-color:#375623;}
+/* 수선 팝업 */
+.rep-popup{width:360px;}
+.rep-popup .ph{background:#C00000;}
+.inch-row{display:flex;align-items:center;gap:5px;margin-bottom:10px;}
+.inch-btn{width:36px;height:36px;border:1px solid #ddd;border-radius:5px;font-size:13px;cursor:pointer;background:#fff;font-weight:700;}
+.inch-inp{width:60px;height:36px;text-align:center;border:1px solid #ddd;border-radius:5px;font-size:16px;font-weight:700;}
+.dir-row{display:flex;gap:6px;}
+.dir-btn{flex:1;padding:8px;border:1px solid #ddd;border-radius:5px;font-size:13px;cursor:pointer;background:#fff;font-weight:600;}
+.dir-btn.on{background:#C00000;color:#fff;border-color:#C00000;}
+/* 확인 팝업 */
+.cf-popup{width:580px;max-height:88vh;}
+.cf-popup .ph{background:#375623;}
+.cf-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.cf-tbl th{background:#f5f5f5;padding:5px 8px;text-align:left;font-size:11px;color:#666;}
+.cf-tbl td{padding:6px 8px;border-bottom:1px solid #f5f5f5;vertical-align:middle;}
+.qty-sel{height:26px;border:1px solid #ddd;border-radius:4px;padding:0 4px;font-size:12px;background:#fff;}
+.badge-tog{display:flex;border:1px solid #ddd;border-radius:4px;overflow:hidden;}
+.badge-tog button{flex:1;padding:4px 6px;border:none;font-size:11px;cursor:pointer;background:#f5f5f5;}
+.badge-tog button.on{background:#375623;color:#fff;}
+/* 수정 팝업 */
+.edit-popup{width:400px;max-height:88vh;}
+.edit-popup .ph{background:#4B2D83;}
+.opt-row{display:flex;gap:5px;margin-top:4px;}
+.opt-btn{flex:1;padding:6px;border:1px solid #ddd;border-radius:5px;font-size:12px;cursor:pointer;background:#fff;text-align:center;font-weight:600;}
+.opt-btn.on{background:#1F4E79;color:#fff;border-color:#1F4E79;}
+/* 검색 팝업 */
+.srch-popup{width:500px;max-height:80vh;}
+.srch-popup .ph{background:#4B2D83;}
+/* 로그 팝업 */
+.log-popup{width:600px;max-height:80vh;}
+.log-popup .ph{background:#595959;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>📋 교복 주문입력 시스템</h1>
+  <span class="clock" id="clock"></span>
+</div>
+<div class="main">
+  <!-- 왼쪽 -->
+  <div class="col">
+    <div class="card">
+      <div class="card-title">등록번호</div>
+      <div class="regnum" id="regnum">-</div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-blue" style="flex:1;" onclick="newStudent()">신규</button>
+        <button class="btn" style="flex:1;" onclick="openSearch()">검색/수정</button>
+      </div>
+    </div>
+    <div class="card" style="flex:1;">
+      <div class="card-title">학생 정보</div>
+      <div class="field">
+        <label>학교 (성별포함)</label>
+        <select id="school" onchange="onSchoolChange()"><option value="">선택하세요</option></select>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>학년</label>
+          <select id="grade"><option>1</option><option>2</option><option>3</option></select>
+        </div>
+        <div class="field">
+          <label>반</label>
+          <input type="number" id="classnum" placeholder="반번호">
+        </div>
+      </div>
+      <div class="field"><label>이름</label><input type="text" id="sname" placeholder="이름"></div>
+      <div class="field">
+        <label>전화번호</label>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <span style="font-size:13px;font-weight:600;white-space:nowrap;">010-</span>
+          <input type="tel" id="phone" placeholder="0000-0000" style="flex:1;">
+        </div>
+      </div>
+      <div class="field">
+        <label>지원방식</label>
+        <div class="support-wrap">
+          <button class="support-btn s-hyunmul" id="sup-h" onclick="selSupport('현물')">현물지원</button>
+          <button class="support-btn" id="sup-k" onclick="selSupport('현금')">현금지원</button>
+          <button class="support-btn" id="sup-i" onclick="selSupport('일반')">일반판매</button>
+        </div>
+        <input type="hidden" id="support" value="현물">
+      </div>
+      <div class="field">
+        <label>납품방식</label>
+        <select id="delivery"><option>매장납품</option><option>학교납품</option></select>
+      </div>
+      <div class="field"><label>비고</label><input type="text" id="note" placeholder="특이사항"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">최근 접수</div>
+      <div id="recent-list"><div style="color:#bbb;font-size:11px;">없음</div></div>
+    </div>
+  </div>
+  <!-- 가운데 -->
+  <div class="col">
+    <div class="action-bar">
+      <button class="btn btn-blue" style="height:34px;padding:0 16px;font-size:13px;" onclick="openSet()">SET 입력</button>
+      <button class="btn" style="height:34px;" onclick="openAddItem()">품목 개별추가</button>
+      <div style="width:1px;height:20px;background:#ddd;"></div>
+      <button class="btn btn-orange" id="btn-repair" style="height:34px;" onclick="openRepair()" disabled>수선입력</button>
+      <button class="btn btn-red" id="btn-del" style="height:34px;" onclick="delSelected()" disabled>삭제</button>
+      <div style="flex:1;"></div>
+      <button class="btn btn-gray" style="height:34px;" onclick="openSearch()">🔍 검색</button>
+    </div>
+    <div style="font-size:11px;color:#888;padding:0 4px;flex-shrink:0;">품목 클릭=선택 / 더블클릭=수정 / 수선버튼으로 수선입력</div>
+    <div class="items-wrap">
+      <div id="empty-msg" style="color:#bbb;font-size:13px;text-align:center;padding:40px 0;">SET 입력 버튼을 눌러 품목을 추가하세요</div>
+      <table class="item-tbl" id="item-tbl" style="display:none;">
+        <thead><tr><th>시즌</th><th>품목</th><th>사이즈</th><th>수량</th><th>명찰</th><th>수선</th><th>금액</th></tr></thead>
+        <tbody id="item-body"></tbody>
+      </table>
+    </div>
+  </div>
+  <!-- 오른쪽 -->
+  <div class="col">
+    <div class="card">
+      <div class="card-title">금액 계산</div>
+      <div class="calc-row"><span>교복비</span><span id="c-edu" style="font-weight:700;">0원</span></div>
+      <div class="calc-row"><span>체육복비</span><span id="c-gym" style="font-weight:700;">0원</span></div>
+      <div class="calc-row"><span style="font-weight:600;">소계</span><span id="c-sub" style="font-weight:700;">0원</span></div>
+      <div class="calc-row"><span>명찰비</span><span id="c-badge">0원</span></div>
+      <div style="background:#E6F1FB;border-radius:6px;padding:7px;margin-top:6px;display:flex;justify-content:space-between;">
+        <span style="font-weight:700;color:#1F4E79;">합계</span>
+        <span id="c-total" style="font-weight:700;color:#1F4E79;font-size:16px;">0원</span>
+      </div>
+      <div style="background:#FFF8DC;border-radius:6px;padding:7px;margin-top:4px;display:flex;justify-content:space-between;">
+        <span style="font-size:12px;color:#856404;">잔금</span>
+        <span id="c-remain" style="font-weight:700;color:#856404;">0원</span>
+      </div>
+    </div>
+    <div class="card" style="flex:1;">
+      <div class="card-title">결제 입력</div>
+      <div style="font-size:11px;color:#888;margin-bottom:4px;">교복/체육복비</div>
+      <div class="pay-wrap" id="pay-btns">
+        <button class="pay-btn" onclick="selPay(this,'현금')">현금</button>
+        <button class="pay-btn" onclick="selPay(this,'계좌')">계좌</button>
+        <button class="pay-btn" onclick="selPay(this,'카드')">카드</button>
+        <button class="pay-btn" onclick="selPay(this,'울산페이')">울산페이</button>
+        <button class="pay-btn" onclick="selPay(this,'제로페이')">제로페이</button>
+        <button class="pay-btn" onclick="selPay(this,'바우처')">바우처</button>
+      </div>
+      <div class="row2" style="margin-bottom:8px;">
+        <div class="field" style="margin:0;"><label>결제금액</label><input type="number" id="pay-amt" oninput="calcRemain()"></div>
+        <div class="field" style="margin:0;"><label>선불/후불</label><select id="pay-type"><option>선불</option><option>후불</option></select></div>
+      </div>
+      <div style="font-size:11px;color:#888;margin-bottom:4px;">명찰비 <span style="color:#C00000;">(현금/계좌만)</span></div>
+      <div class="pay-wrap" id="bpay-btns">
+        <button class="bpay-btn" onclick="selBPay(this,'현금')">현금</button>
+        <button class="bpay-btn" onclick="selBPay(this,'계좌')">계좌</button>
+      </div>
+      <div class="field"><label>명찰비 금액</label><input type="number" id="badge-amt" oninput="calcRemain()"></div>
+      <div class="field"><label>담당자</label><input type="text" id="staff"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <button class="btn btn-blue" style="height:38px;font-size:14px;font-weight:700;" onclick="saveOrder()">저장 + 접수증 출력</button>
+      <button class="btn btn-green" style="height:32px;" onclick="saveOnly()">저장만</button>
+      <div style="display:flex;gap:5px;">
+        <button class="btn btn-gray" style="flex:1;height:30px;font-size:11px;" onclick="downloadExcel()">📥 엑셀</button>
+        <button class="btn btn-gray" style="flex:1;height:30px;font-size:11px;" onclick="showLog()">📋 로그</button>
+        <button class="btn btn-red" style="flex:1;height:30px;font-size:11px;" onclick="resetAll()">초기화</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SET 사이즈 팝업 -->
+<div id="sz-popup" class="popup-bg" style="display:none;">
+  <div class="popup sz-popup">
+    <div class="ph"><h2 id="sz-title">품목 입력</h2><small id="sz-prog"></small></div>
+    <div class="pb" id="sz-body"></div>
+  </div>
+</div>
+
+<!-- 수선 팝업 -->
+<div id="rep-popup" class="popup-bg" style="display:none;">
+  <div class="popup rep-popup">
+    <div class="ph"><h2 id="rep-title">수선입력</h2><small id="rep-item"></small></div>
+    <div class="pb">
+      <div class="inch-row">
+        <button class="inch-btn" onclick="adjInch('rep-inch',-1)">-1</button>
+        <button class="inch-btn" onclick="adjInch('rep-inch',-0.25)">-¼</button>
+        <input class="inch-inp" type="text" id="rep-inch" value="37">
+        <button class="inch-btn" onclick="adjInch('rep-inch',0.25)">+¼</button>
+        <button class="inch-btn" onclick="adjInch('rep-inch',1)">+1</button>
+        <span style="font-size:12px;margin-left:4px;">inch</span>
+      </div>
+      <div class="dir-row" id="rep-dirs">
+        <button class="dir-btn on" onclick="selDir('rep-dirs',this,'줄임')">줄임</button>
+        <button class="dir-btn" onclick="selDir('rep-dirs',this,'늘림')">늘림</button>
+        <button class="dir-btn" onclick="selDir('rep-dirs',this,'수선안함')">수선안함</button>
+      </div>
+      <div id="waist-area" style="display:none;margin-top:10px;padding:10px;background:#FFF8DC;border-radius:6px;">
+        <label style="font-size:12px;color:#856404;font-weight:700;display:block;margin-bottom:4px;">허리수선 내용</label>
+        <textarea id="waist-txt" style="width:100%;height:50px;border:1px solid #ddd;border-radius:5px;padding:6px;font-size:12px;resize:none;" placeholder="허리수선 내용 (없으면 빈칸)"></textarea>
+      </div>
+    </div>
+    <div class="pf">
+      <button class="btn" onclick="closeRep()">취소</button>
+      <button class="btn btn-red" style="flex:1;height:36px;font-size:14px;" onclick="confirmRep()">완료</button>
+    </div>
+  </div>
+</div>
+
+<!-- 최종확인 팝업 (수량/명찰/수선) -->
+<div id="cf-popup" class="popup-bg" style="display:none;">
+  <div class="popup cf-popup">
+    <div class="ph" style="background:#375623;"><h2>수량 / 명찰 / 수선 확인</h2><small>확정 전 최종 확인</small></div>
+    <div style="padding:14px;overflow-y:auto;max-height:calc(88vh - 110px);">
+      <table class="cf-tbl">
+        <thead><tr><th>시즌</th><th>품목</th><th>사이즈</th><th>수량</th><th>명찰</th><th>수선입력</th></tr></thead>
+        <tbody id="cf-body"></tbody>
+      </table>
+    </div>
+    <div class="pf">
+      <button class="btn" onclick="closeCF()">취소</button>
+      <button class="btn btn-green" style="flex:1;height:36px;font-size:14px;font-weight:700;" onclick="applyCF()">확정</button>
+    </div>
+  </div>
+</div>
+
+<!-- 수정 팝업 -->
+<div id="edit-popup" class="popup-bg" style="display:none;">
+  <div class="popup edit-popup">
+    <div class="ph" style="background:#4B2D83;"><h2 id="edit-title">품목 수정</h2></div>
+    <div class="pb">
+      <div id="edit-alt-area" style="display:none;margin-bottom:12px;">
+        <label style="margin-bottom:4px;">대체품목</label>
+        <div id="edit-alt-btns" class="alt-wrap"></div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="margin-bottom:6px;">사이즈</label>
+        <div class="sz-grid" id="edit-sz-grid"></div>
+      </div>
+      <div class="row2" style="gap:10px;margin-bottom:10px;">
+        <div>
+          <label>수량</label>
+          <div class="opt-row" id="edit-qty-row">
+            <button class="opt-btn" onclick="selEditQty(this,1)">1개</button>
+            <button class="opt-btn" onclick="selEditQty(this,2)">2개</button>
+            <button class="opt-btn" onclick="selEditQty(this,3)">3개</button>
+          </div>
+        </div>
+        <div>
+          <label>명찰</label>
+          <div class="opt-row" id="edit-badge-row">
+            <button class="opt-btn" onclick="selEditBadge(this,'명')">명찰있음</button>
+            <button class="opt-btn" onclick="selEditBadge(this,'X')">없음</button>
+          </div>
+        </div>
+      </div>
+      <div id="edit-rep-area" style="display:none;">
+        <label style="margin-bottom:4px;">기장수선</label>
+        <div class="inch-row">
+          <button class="inch-btn" onclick="adjInch('edit-inch',-1)">-1</button>
+          <button class="inch-btn" onclick="adjInch('edit-inch',-0.25)">-¼</button>
+          <input class="inch-inp" type="text" id="edit-inch" value="37">
+          <button class="inch-btn" onclick="adjInch('edit-inch',0.25)">+¼</button>
+          <button class="inch-btn" onclick="adjInch('edit-inch',1)">+1</button>
+          <span style="font-size:12px;margin-left:4px;">inch</span>
+        </div>
+        <div class="dir-row" id="edit-rep-dirs">
+          <button class="dir-btn" onclick="selDir('edit-rep-dirs',this,'줄임')">줄임</button>
+          <button class="dir-btn" onclick="selDir('edit-rep-dirs',this,'늘림')">늘림</button>
+          <button class="dir-btn" onclick="selDir('edit-rep-dirs',this,'수선안함')">수선안함</button>
+        </div>
+        <div style="margin-top:8px;">
+          <label style="margin-bottom:4px;">허리수선</label>
+          <textarea id="edit-waist" style="width:100%;height:40px;border:1px solid #ddd;border-radius:5px;padding:6px;font-size:12px;resize:none;" placeholder="허리수선 내용"></textarea>
+        </div>
+      </div>
+      <div id="edit-sleeve-area" style="display:none;margin-top:8px;">
+        <label style="margin-bottom:4px;">소매수선 (inch)</label>
+        <div class="inch-row">
+          <button class="inch-btn" onclick="adjInch('edit-sleeve-inch',-1)">-1</button>
+          <button class="inch-btn" onclick="adjInch('edit-sleeve-inch',-0.25)">-¼</button>
+          <input class="inch-inp" type="text" id="edit-sleeve-inch" value="0">
+          <button class="inch-btn" onclick="adjInch('edit-sleeve-inch',0.25)">+¼</button>
+          <button class="inch-btn" onclick="adjInch('edit-sleeve-inch',1)">+1</button>
+          <span style="font-size:12px;margin-left:4px;">inch</span>
+        </div>
+        <div class="dir-row" id="edit-sleeve-dirs">
+          <button class="dir-btn" onclick="selDir('edit-sleeve-dirs',this,'줄임')">줄임</button>
+          <button class="dir-btn" onclick="selDir('edit-sleeve-dirs',this,'늘림')">늘림</button>
+          <button class="dir-btn" onclick="selDir('edit-sleeve-dirs',this,'수선안함')">수선안함</button>
+        </div>
+      </div>
+    </div>
+    <div class="pf">
+      <button class="btn" onclick="closeEdit()">취소</button>
+      <button class="btn btn-red" style="height:34px;" onclick="delEditItem()">삭제</button>
+      <button class="btn" style="background:#4B2D83;color:#fff;flex:1;height:34px;" onclick="confirmEdit()">수정완료</button>
+    </div>
+  </div>
+</div>
+
+<!-- 검색 팝업 -->
+<div id="srch-popup" class="popup-bg" style="display:none;">
+  <div class="popup srch-popup">
+    <div class="ph" style="background:#4B2D83;"><h2>학생 검색 / 수정</h2></div>
+    <div class="pb">
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <input type="text" id="srch-q" placeholder="등록번호 또는 이름" style="flex:1;height:32px;border:1px solid #ddd;border-radius:5px;padding:0 10px;font-size:13px;">
+        <button class="btn btn-blue" onclick="doSearch()">검색</button>
+      </div>
+      <div id="srch-result" style="max-height:320px;overflow-y:auto;font-size:13px;color:#888;"></div>
+    </div>
+    <div class="pf" style="justify-content:flex-end;"><button class="btn" onclick="closeSrch()">닫기</button></div>
+  </div>
+</div>
+
+<!-- 로그 팝업 -->
+<div id="log-popup" class="popup-bg" style="display:none;">
+  <div class="popup log-popup">
+    <div class="ph" style="background:#595959;"><h2>액션 로그</h2><small id="log-cnt"></small></div>
+    <div style="padding:14px;overflow-y:auto;max-height:calc(80vh - 100px);">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr style="background:#f5f5f5;">
+          <th style="padding:5px 8px;text-align:left;">시간</th>
+          <th style="padding:5px 8px;text-align:left;">구분</th>
+          <th style="padding:5px 8px;text-align:left;">등록번호</th>
+          <th style="padding:5px 8px;text-align:left;">내용</th>
+          <th style="padding:5px 8px;text-align:left;">담당자</th>
+        </tr></thead>
+        <tbody id="log-body"></tbody>
+      </table>
+    </div>
+    <div class="pf" style="justify-content:space-between;">
+      <button class="btn btn-red" onclick="if(confirm('로그를 초기화할까요?')){actionLog=[];saveAll();closeLog();}">초기화</button>
+      <button class="btn" onclick="closeLog()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 개별추가 팝업 -->
+<div id="add-popup" class="popup-bg" style="display:none;">
+  <div class="popup" style="width:440px;max-height:88vh;">
+    <div class="ph" style="background:#833232;"><h2>품목 개별추가</h2></div>
+    <div class="pb">
+      <div class="row2" style="gap:8px;margin-bottom:8px;">
+        <div class="field" style="margin:0;"><label>시즌</label>
+          <select id="add-season"><option>동복</option><option>하복</option></select>
+        </div>
+        <div class="field" style="margin:0;"><label>학교</label>
+          <select id="add-school"></select>
+        </div>
+      </div>
+      <div class="field"><label>품목</label>
+        <select id="add-item" onchange="onAddItemChange()"></select>
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="margin-bottom:6px;">사이즈</label>
+        <div class="sz-grid" id="add-sz-grid"></div>
+      </div>
+      <div id="add-rep-box" style="display:none;background:#FFF8E1;border:1px solid #FFD54F;border-radius:6px;padding:10px;margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:700;color:#C00000;margin-bottom:8px;">기장수선</div>
+        <div class="inch-row">
+          <button class="inch-btn" onclick="adjInch('add-inch',-1)">-1</button>
+          <button class="inch-btn" onclick="adjInch('add-inch',-0.25)">-¼</button>
+          <input class="inch-inp" type="text" id="add-inch" value="37">
+          <button class="inch-btn" onclick="adjInch('add-inch',0.25)">+¼</button>
+          <button class="inch-btn" onclick="adjInch('add-inch',1)">+1</button>
+          <span style="font-size:12px;margin-left:4px;">inch</span>
+        </div>
+        <div class="dir-row" id="add-rep-dirs">
+          <button class="dir-btn on" onclick="selDir('add-rep-dirs',this,'줄임')">줄임</button>
+          <button class="dir-btn" onclick="selDir('add-rep-dirs',this,'늘림')">늘림</button>
+          <button class="dir-btn" onclick="selDir('add-rep-dirs',this,'수선안함')">수선안함</button>
+        </div>
+      </div>
+      <div class="row2" style="gap:8px;">
+        <div>
+          <label>수량</label>
+          <div class="opt-row" id="add-qty-row">
+            <button class="opt-btn on" onclick="selAddQty(this,1)">1개</button>
+            <button class="opt-btn" onclick="selAddQty(this,2)">2개</button>
+            <button class="opt-btn" onclick="selAddQty(this,3)">3개</button>
+          </div>
+        </div>
+        <div>
+          <label>명찰</label>
+          <div class="opt-row" id="add-badge-row">
+            <button class="opt-btn on" onclick="selAddBadge(this,'명')">명찰있음</button>
+            <button class="opt-btn" onclick="selAddBadge(this,'X')">없음</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pf">
+      <button class="btn" onclick="closeAdd()">취소</button>
+      <button class="btn btn-green" style="flex:1;height:34px;" onclick="confirmAdd()">추가</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== 여기서부터 구글시트 자동생성 데이터 =====
+var SCHOOLS=[
+  {name:'무룡중남',code:'A',support:'현물',supportAmt:0},
+  {name:'무룡중여',code:'B',support:'현물',supportAmt:0},
+  {name:'효정중남',code:'C',support:'현금',supportAmt:300000},
+  {name:'효정중여',code:'D',support:'현금',supportAmt:300000},
+  {name:'다운고남',code:'E',support:'현물',supportAmt:0},
+  {name:'다운고여',code:'F',support:'현물',supportAmt:0},
+  {name:'중앙고남',code:'G',support:'현물',supportAmt:0},
+  {name:'중앙고여',code:'H',support:'현물',supportAmt:0},
+  {name:'학성여고여',code:'I',support:'현금',supportAmt:300000},
+  {name:'화봉고남',code:'K',support:'현물',supportAmt:0},
+  {name:'화봉고여',code:'L',support:'현물',supportAmt:0},
+];
+var S3=[59,62,65,68,71,74,77,80,83,86,89,92,95,98,101,104,107,110,113,116,119];
+var S5=[80,85,90,95,100,105,110,115,120,125,130,135,140,145,150];
+var ITEMS=[
+  {code:'J', name:'자켓',          type:'교복',   repair:'sleeve', sizes:S5},
+  {code:'K', name:'니트',          type:'교복',   repair:'',       sizes:S5},
+  {code:'Y', name:'셔츠',          type:'교복',   repair:'',       sizes:S5},
+  {code:'B', name:'블라우스',      type:'교복',   repair:'',       sizes:S5},
+  {code:'S', name:'치마',          type:'교복',   repair:'sleeve',     sizes:S3},
+  {code:'P', name:'바지(조절기)',  type:'교복',   repair:'기장허리',sizes:S3},
+  {code:'PE',name:'바지(고무줄)', type:'교복',   repair:'기장허리',sizes:S5},
+  {code:'H', name:'반바지(조절기)',type:'교복',   repair:'',       sizes:S3},
+  {code:'HE',name:'반바지(고무줄)',type:'교복',  repair:'',       sizes:S5},
+  {code:'HD',name:'후드집업',      type:'교복',   repair:'',       sizes:S5},
+  {code:'HT',name:'후드티',        type:'교복',   repair:'',       sizes:S5},
+  {code:'Q', name:'점퍼',          type:'교복',   repair:'',       sizes:S5},
+  {code:'T', name:'생활티',        type:'교복',   repair:'',       sizes:S5},
+  {code:'WF',name:'체육복',        type:'체육복', repair:'',       sizes:S5},
+];
+var SCHOOL_SET={
+  '화봉고남':[
+    {code:'J',season:'동복',alt:[]},
+    {code:'K',season:'동복',alt:[]},
+    {code:'Y',season:'동복',alt:[]},
+    {code:'P',season:'동복',alt:['PE']},
+    {code:'WF',season:'동복',alt:[]},
+    {code:'T',season:'하복',alt:[]},
+    {code:'H',season:'하복',alt:['HE']},
+    {code:'WF',season:'하복',alt:[]},
+  ],
+  '화봉고여':[
+    {code:'J',season:'동복',alt:[]},
+    {code:'K',season:'동복',alt:[]},
+    {code:'B',season:'동복',alt:[]},
+    {code:'S',season:'동복',alt:['P']},
+    {code:'WF',season:'동복',alt:[]},
+    {code:'T',season:'하복',alt:[]},
+    {code:'HE',season:'하복',alt:['H']},
+    {code:'WF',season:'하복',alt:[]},
+  ],
+  '무룡중남':[
+    {code:'J',season:'동복',alt:[]},
+    {code:'K',season:'동복',alt:[]},
+    {code:'Y',season:'동복',alt:[]},
+    {code:'P',season:'동복',alt:['PE']},
+    {code:'WF',season:'동복',alt:[]},
+    {code:'T',season:'하복',alt:[]},
+    {code:'H',season:'하복',alt:['HE']},
+    {code:'WF',season:'하복',alt:[]},
+  ],
+  '무룡중여':[
+    {code:'J',season:'동복',alt:[]},
+    {code:'K',season:'동복',alt:[]},
+    {code:'B',season:'동복',alt:[]},
+    {code:'S',season:'동복',alt:['P']},
+    {code:'WF',season:'동복',alt:[]},
+    {code:'T',season:'하복',alt:[]},
+    {code:'HE',season:'하복',alt:['H']},
+    {code:'WF',season:'하복',alt:[]},
+  ],
+  '효정중남':[
+    {code:'J',season:'동복',alt:[]},
+    {code:'K',season:'동복',alt:[]},
+    {code:'Y',season:'동복',alt:[]},
+    {code:'P',season:'동복',alt:['PE']},
+    {code:'WF',season:'동복',alt:[]},
+    {code:'T',season:'하복',alt:[]},
+    {code:'H',season:'하복',alt:['HE']},
+    {code:'WF',season:'하복',alt:[]},
+  ],
+  '효정중여':[
+    {code:'J',season:'동복',alt:[]},
+    {code:'K',season:'동복',alt:[]},
+    {code:'B',season:'동복',alt:[]},
+    {code:'S',season:'동복',alt:['P']},
+    {code:'WF',season:'동복',alt:[]},
+    {code:'T',season:'하복',alt:[]},
+    {code:'HE',season:'하복',alt:['H']},
+    {code:'WF',season:'하복',alt:[]},
+  ],
+  '다운고남':[
+    {code:'J',season:'동복',alt:[]},
+    {code:'K',season:'동복',alt:[]},
+    {code:'Y',season:'동복',alt:[]},
+    {code:'P',season:'동복',alt:['PE']},
+    {code:'WF',season:'동복',alt:[]},
+    {code:'Y',season:'하복',alt:[]},
+    {code:'H',season:'하복',alt:['HE']},
+    {code:'WF',season:'하복',alt:[]},
+  ],
+  '다운고여':[
+    {code:'J',season:'동복',alt:[]},
+    {code:'K',season:'동복',alt:[]},
+    {code:'B',season:'동복',alt:[]},
+    {code:'S',season:'동복',alt:['P']},
+    {code:'WF',season:'동복',alt:[]},
+    {code:'B',season:'하복',alt:[]},
+    {code:'HE',season:'하복',alt:['H']},
+    {code:'WF',season:'하복',alt:[]},
+  ],
+  '중앙고남':[
+    {code:'J',season:'동복',alt:[]},
+    {code:'K',season:'동복',alt:[]},
+    {code:'Y',season:'동복',alt:[]},
+    {code:'P',season:'동복',alt:['PE']},
+    {code:'WF',season:'동복',alt:[]},
+    {code:'Y',season:'하복',alt:[]},
+    {code:'H',season:'하복',alt:['HE']},
+    {code:'WF',season:'하복',alt:[]},
+  ],
+  '중앙고여':[
+    {code:'J',season:'동복',alt:[]},
+    {code:'K',season:'동복',alt:[]},
+    {code:'B',season:'동복',alt:[]},
+    {code:'S',season:'동복',alt:['P']},
+    {code:'WF',season:'동복',alt:[]},
+    {code:'B',season:'하복',alt:[]},
+    {code:'HE',season:'하복',alt:['H']},
+    {code:'WF',season:'하복',alt:[]},
+  ],
+  '학성여고여':[
+    {code:'J',season:'동복',alt:[]},
+    {code:'K',season:'동복',alt:[]},
+    {code:'B',season:'동복',alt:[]},
+    {code:'S',season:'동복',alt:['P']},
+    {code:'WF',season:'동복',alt:[]},
+    {code:'B',season:'하복',alt:[]},
+    {code:'HE',season:'하복',alt:['H']},
+    {code:'WF',season:'하복',alt:[]},
+  ],
+};
+var PRICE_MAP={
+  '화봉고남':{'동복_J':120000,'동복_K':85000,'동복_Y':35000,'동복_P':85000,'동복_PE':85000,'동복_WF':65000,'하복_T':30000,'하복_H':45000,'하복_HE':45000,'하복_WF':55000},
+  '화봉고여':{'동복_J':120000,'동복_K':85000,'동복_B':35000,'동복_S':75000,'동복_P':85000,'동복_WF':65000,'하복_T':30000,'하복_HE':70000,'하복_H':45000,'하복_WF':55000},
+  '무룡중남':{'동복_J':120000,'동복_K':85000,'동복_Y':35000,'동복_P':85000,'동복_PE':85000,'동복_WF':65000,'하복_T':30000,'하복_H':45000,'하복_HE':45000,'하복_WF':55000},
+  '무룡중여':{'동복_J':120000,'동복_K':85000,'동복_B':35000,'동복_S':75000,'동복_P':85000,'동복_WF':65000,'하복_T':30000,'하복_HE':45000,'하복_H':45000,'하복_WF':55000},
+  '효정중남':{'동복_J':120000,'동복_K':85000,'동복_Y':35000,'동복_P':85000,'동복_PE':85000,'동복_WF':65000,'하복_T':30000,'하복_H':45000,'하복_HE':45000,'하복_WF':55000},
+  '효정중여':{'동복_J':120000,'동복_K':85000,'동복_B':35000,'동복_S':75000,'동복_P':85000,'동복_WF':65000,'하복_T':30000,'하복_HE':45000,'하복_H':45000,'하복_WF':55000},
+  '다운고남':{'동복_J':120000,'동복_K':85000,'동복_Y':35000,'동복_P':85000,'동복_PE':85000,'동복_WF':65000,'하복_Y':35000,'하복_H':45000,'하복_HE':45000,'하복_WF':55000},
+  '다운고여':{'동복_J':120000,'동복_K':85000,'동복_B':35000,'동복_S':75000,'동복_P':85000,'동복_WF':65000,'하복_B':30000,'하복_HE':45000,'하복_H':45000,'하복_WF':55000},
+  '중앙고남':{'동복_J':120000,'동복_K':85000,'동복_Y':35000,'동복_P':85000,'동복_PE':85000,'동복_WF':65000,'하복_Y':35000,'하복_H':45000,'하복_HE':45000,'하복_WF':55000},
+  '중앙고여':{'동복_J':120000,'동복_K':85000,'동복_B':35000,'동복_S':75000,'동복_P':85000,'동복_WF':65000,'하복_B':30000,'하복_HE':45000,'하복_H':45000,'하복_WF':55000},
+  '학성여고여':{'동복_J':120000,'동복_K':85000,'동복_B':35000,'동복_S':75000,'동복_WF':65000,'하복_B':30000,'하복_HE':45000,'하복_H':45000,'하복_WF':55000},
+};
+function getSizes(code){var s3=['S','P','H'];return s3.indexOf(code)>-1?S3:S5;}
+function getPrice(sc,season,code){return (PRICE_MAP[sc]&&PRICE_MAP[sc][season+'_'+code])||0;}
+// ===== 구글시트 자동생성 데이터 끝 =====
+
+// ===== 앱 상태 =====
+var SK='order_v2';
+var orders=[];
+var counters={};
+var actionLog=[];
+var selIdx=-1;
+var pendingItems=[];
+var setSteps=[];
+var setIdx=0;
+var repTargetIdx=-1;
+var repMode=''; // 'set' or 'order'
+var editIdx=-1;
+var editQty=1;
+var editBadge='명';
+var addSz='';
+var addQty=1;
+var addBadge='명';
+var payMethod='';
+var bpayMethod='';
+var _editingRegnum=null;
+var _editingIdx=-1;
+
+// ===== 저장/로드 =====
+function saveAll(){
+  try{
+    localStorage.setItem(SK,JSON.stringify(orders));
+    localStorage.setItem(SK+'_log',JSON.stringify(actionLog));
+    localStorage.setItem(SK+'_cnt',JSON.stringify(counters));
+  }catch(e){}
+}
+
+// ===== Supabase 연동 =====
+var SUPABASE_URL = 'https://emuibpnrnaoiqfkaajam.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtdWlicG5ybmFvaXFma2FhamFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwMzA1NDEsImV4cCI6MjA5NzYwNjU0MX0.seqAovGu8B3AXYFLp5FZCflc3el1MofD8FisVjh1Pgc';
+
+async function sbFetch(path, method, body) {
+  var opts = {
+    method: method || 'GET',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : ''
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  var res = await fetch(SUPABASE_URL + '/rest/v1/' + path, opts);
+  if (!res.ok) {
+    var err = await res.text();
+    throw new Error(err);
+  }
+  return res.json();
+}
+
+// 학생 저장/수정
+async function saveStudentToDB(order) {
+  try {
+    // upsert (있으면 수정, 없으면 삽입)
+    await sbFetch('students?on_conflict=regnum', 'POST', {
+      regnum: order.regnum,
+      school: order.school,
+      grade: order.grade,
+      classnum: order.classnum,
+      name: order.name,
+      phone: order.phone,
+      support: order.support,
+      delivery: order.delivery,
+      note: order.note,
+      staff: order.staff,
+      updated_at: new Date().toISOString()
+    });
+
+    // 기존 주문내역 삭제 후 재삽입
+    await sbFetch('orders?regnum=eq.' + order.regnum, 'DELETE');
+    if (order.items && order.items.length) {
+      await sbFetch('orders', 'POST', order.items.map(function(it) {
+        return {
+          regnum: order.regnum,
+          season: it.season,
+          item_type: it.type,
+          item_code: it.code,
+          item_name: it.name,
+          school: it.school || order.school,
+          size: parseInt(it.size) || 0,
+          qty: it.qty || 1,
+          badge: it.badge || '명',
+          repair: it.repair || '',
+          price: it.price || 0
+        };
+      }));
+    }
+
+    // 결제 저장
+    if (order.payAmount && parseInt(order.payAmount) > 0) {
+      await sbFetch('payments', 'POST', {
+        regnum: order.regnum,
+        pay_type: '교복비',
+        pay_method: order.payMethod || '',
+        amount: parseInt(order.payAmount) || 0,
+        pre_post: order.payType || '선불',
+        staff: order.staff || ''
+      });
+    }
+    if (order.badgeAmount && parseInt(order.badgeAmount) > 0) {
+      await sbFetch('payments', 'POST', {
+        regnum: order.regnum,
+        pay_type: '명찰비',
+        pay_method: order.bpayMethod || '',
+        amount: parseInt(order.badgeAmount) || 0,
+        pre_post: '선불',
+        staff: order.staff || ''
+      });
+    }
+
+    // 로그 저장
+    await sbFetch('action_logs', 'POST', {
+      log_type: order._isEdit ? '수정' : '신규',
+      regnum: order.regnum,
+      detail: order.school + ' ' + order.name + ' 품목' + (order.items ? order.items.length : 0) + '건',
+      staff: order.staff || ''
+    });
+
+    return true;
+  } catch(e) {
+    console.error('DB 저장 오류:', e);
+    return false;
+  }
+}
+
+// 학생 검색
+async function searchFromDB(q) {
+  try {
+    var res = await sbFetch('students?or=(regnum.ilike.*' + q + '*,name.ilike.*' + q + '*)&order=created_at.desc&limit=20');
+    return res;
+  } catch(e) {
+    console.error('검색 오류:', e);
+    return [];
+  }
+}
+
+// 전체 주문 불러오기 (엑셀용)
+async function loadAllFromDB() {
+  try {
+    var students = await sbFetch('students?order=created_at.desc&limit=500');
+    var orderItems = await sbFetch('orders?order=created_at.asc&limit=5000');
+    var payments = await sbFetch('payments?order=created_at.asc&limit=2000');
+    return {students: students, orders: orderItems, payments: payments};
+  } catch(e) {
+    console.error('불러오기 오류:', e);
+    return null;
+  }
+}
+// ===== Supabase 연동 끝 =====
+
+function loadAll(){
+  try{
+    var r=localStorage.getItem(SK); if(r) orders=JSON.parse(r);
+    var l=localStorage.getItem(SK+'_log'); if(l) actionLog=JSON.parse(l);
+    var c=localStorage.getItem(SK+'_cnt'); if(c) counters=JSON.parse(c);
+  }catch(e){}
+}
+function addLog(type,regnum,detail){
+  actionLog.push({time:new Date().toLocaleString('ko-KR'),type:type,regnum:regnum||'',detail:detail||'',staff:document.getElementById('staff').value||''});
+  if(actionLog.length>1000) actionLog.shift();
+}
+
+// ===== 초기화 =====
+function init(){
+  var sc=document.getElementById('school');
+  SCHOOLS.forEach(function(s){
+    var o=document.createElement('option');
+    o.value=s.name;o.textContent=s.name;sc.appendChild(o);
+  });
+  var as=document.getElementById('add-school');
+  SCHOOLS.forEach(function(s){
+    var o=document.createElement('option');
+    o.value=s.name;o.textContent=s.name;as.appendChild(o);
+  });
+  var ai=document.getElementById('add-item');
+  ITEMS.forEach(function(it){
+    var o=document.createElement('option');
+    o.value=it.code;o.textContent=it.name;ai.appendChild(o);
+  });
+  loadAll();
+  renderRecent();
+  clock();
+  setInterval(clock,30000);
+}
+function clock(){
+  var d=new Date();
+  document.getElementById('clock').textContent=d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate()+' '+d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');
+}
+
+// ===== 학생정보 =====
+function onSchoolChange(){
+  var sc=document.getElementById('school').value;
+  document.getElementById('add-school').value=sc;
+  var s=SCHOOLS.find(function(x){return x.name===sc;});
+  if(s) selSupport(s.support==='현금'?'현금':s.support==='일반'?'일반':'현물');
+  genRegNum();
+}
+function genRegNum(){
+  var sc=document.getElementById('school').value;
+  if(!sc){document.getElementById('regnum').textContent='-';return;}
+  var s=SCHOOLS.find(function(x){return x.name===sc;});
+  if(!s) return;
+  var key=sc;
+  if(!counters[key]) counters[key]=0;
+  document.getElementById('regnum').textContent=s.code+String(counters[key]+1).padStart(3,'0');
+}
+function selSupport(v){
+  document.getElementById('support').value=v;
+  document.getElementById('sup-h').className='support-btn'+(v==='현물'?' s-hyunmul':'');
+  document.getElementById('sup-k').className='support-btn'+(v==='현금'?' s-hyungum':'');
+  document.getElementById('sup-i').className='support-btn'+(v==='일반'?' s-ilban':'');
+  calcTotal();
+}
+function newStudent(){resetAll();}
+
+// ===== SET 입력 =====
+function openSet(){
+  var sc=document.getElementById('school').value;
+  if(!sc){alert('학교를 먼저 선택해주세요');return;}
+  var steps=SCHOOL_SET[sc];
+  if(!steps||!steps.length){alert('해당 학교의 품목 설정이 없습니다\n구글시트에서 설정해주세요');return;}
+  setSteps=steps;setIdx=0;pendingItems=[];
+  document.getElementById('sz-popup').style.display='flex';
+  renderSzStep();
+}
+function renderSzStep(){
+  var step=setSteps[setIdx];
+  var item=ITEMS.find(function(x){return x.code===step.code;});
+  if(!item) return;
+  document.getElementById('sz-title').textContent=step.season+' — '+item.name;
+  document.getElementById('sz-prog').textContent=(setIdx+1)+'/'+setSteps.length;
+  var curCode=step._cur||step.code;
+  var html='';
+  if(step.alt&&step.alt.length){
+    html+='<div style="margin-bottom:10px;"><div style="font-size:11px;color:#888;margin-bottom:6px;">품목 선택</div><div class="alt-wrap">';
+    html+='<button class="alt-btn'+(curCode===step.code?' on':'')+'" onclick="selAlt(this,\''+step.code+'\')">'+item.name+'</button>';
+    step.alt.forEach(function(ac){
+      var ai=ITEMS.find(function(x){return x.code===ac;});
+      if(ai) html+='<button class="alt-btn'+(curCode===ac?' on':'')+'" onclick="selAlt(this,\''+ac+'\')">'+ai.name+'</button>';
+    });
+    html+='</div></div>';
+  }
+  var curItem=ITEMS.find(function(x){return x.code===curCode;})||item;
+  html+='<div style="font-size:11px;color:#888;margin-bottom:6px;"><b>사이즈 선택</b> — 누르면 바로 다음</div>';
+  html+='<div class="sz-grid" id="sz-grid">';
+  curItem.sizes.forEach(function(sz){
+    html+='<button class="sz-btn" onclick="selSzSize(\''+curCode+'\','+sz+',\''+step.season+'\')">'+sz+'</button>';
+  });
+  html+='</div>';
+  html+='<div style="margin-top:10px;display:flex;gap:6px;">';
+  if(setIdx>0) html+='<button class="btn" onclick="szBack()">◀ 이전</button>';
+  html+='<button class="btn" style="flex:1;" onclick="szSkip()">건너뛰기</button>';
+  html+='<button class="btn btn-red" onclick="cancelSet()">취소</button>';
+  html+='</div>';
+  document.getElementById('sz-body').innerHTML=html;
+}
+function selAlt(el,code){
+  document.querySelectorAll('.alt-btn').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+  setSteps[setIdx]._cur=code;
+  var item=ITEMS.find(function(x){return x.code===code;});
+  if(!item) return;
+  var season=setSteps[setIdx].season;
+  document.getElementById('sz-grid').innerHTML=item.sizes.map(function(sz){
+    return '<button class="sz-btn" onclick="selSzSize(\''+code+'\','+sz+',\''+season+'\')">'+sz+'</button>';
+  }).join('');
+}
+function selSzSize(code,sz,season){
+  var item=ITEMS.find(function(x){return x.code===code;});
+  var sc=document.getElementById('school').value;
+  var price=getPrice(sc,season,code);
+  var p={code:code,name:item.name,type:item.type,season:season,size:sz,repair:'',waistRepair:'',qty:1,badge:'명',price:price,school:sc};
+  pendingItems.push(p);
+  // 바지(기장/기장허리)만 필수 팝업, 치마/자켓(sleeve)은 선택사항이라 팝업 안 띄움
+  if(item.repair==='기장'||item.repair==='기장허리'){
+    document.getElementById('sz-popup').style.display='none';
+    openRepPopup(item,sz,'set',pendingItems.length-1,item.repair==='기장허리');
+    return;
+  }
+  szNext();
+}
+
+function cancelSet(){
+  pendingItems=[];
+  document.getElementById('sz-popup').style.display='none';
+}
+function szNext(){
+  if(setIdx<setSteps.length-1){setIdx++;setSteps[setIdx]._cur=null;renderSzStep();}
+  else{closeSz();if(pendingItems.length) openCF();}
+}
+function szSkip(){szNext();}
+function szBack(){
+  if(setIdx>0){
+    if(pendingItems.length) pendingItems.pop();
+    setIdx--;renderSzStep();
+  }
+}
+function closeSz(){document.getElementById('sz-popup').style.display='none';}
+
+// ===== 수선 팝업 =====
+function openRepPopup(item,sz,mode,targetIdx,showWaist){
+  repMode=mode;repTargetIdx=targetIdx;
+  document.getElementById('rep-title').textContent=item.repair==='sleeve'?'소매수선(inch)':showWaist?'기장/허리수선':'기장수선';
+  document.getElementById('rep-item').textContent=item.name+' '+sz;
+  var defVal=item.repair==='sleeve'?'0':'37';
+  var curRepair='';
+  if(mode==='order'&&repTargetIdx>=0) curRepair=orders[repTargetIdx]?'':'' ; // handled below
+  document.getElementById('rep-inch').value=defVal;
+  document.querySelectorAll('#rep-dirs .dir-btn').forEach(function(b,i){b.classList.toggle('on',i===0);});
+  var wa=document.getElementById('waist-area');
+  wa.style.display=showWaist?'block':'none';
+  document.getElementById('waist-txt').value='';
+  document.getElementById('rep-popup').style.display='flex';
+}
+function openRepair(){
+  if(selIdx<0){alert('품목을 먼저 선택해주세요');return;}
+  if(selIdx>=currentItems.length){alert('품목을 먼저 선택해주세요');return;}
+  var cur=currentItems[selIdx];
+  var item=ITEMS.find(function(x){return x.code===cur.code;});
+  if(!item||!item.repair){alert('이 품목은 수선 대상이 아닙니다');return;}
+  repMode='order';repTargetIdx=selIdx;
+  document.getElementById('rep-title').textContent=item.repair==='sleeve'?'소매수선(inch)':item.repair==='기장허리'?'기장/허리수선':'기장수선';
+  document.getElementById('rep-item').textContent=item.name+' '+cur.size;
+  var defVal=(item.repair==='sleeve')?'0':'37';
+  var curRep=cur.repair||'';
+  var curInch=curRep&&curRep!=='수선안함'?(curRep.match(/[\d.]+/)||[defVal])[0]:defVal;
+  var curDir=curRep==='수선안함'?'수선안함':(curRep.indexOf('늘림')>-1?'늘림':'줄임');
+  document.getElementById('rep-inch').value=curInch;
+  document.querySelectorAll('#rep-dirs .dir-btn').forEach(function(b){b.classList.toggle('on',b.textContent===curDir);});
+  var wa=document.getElementById('waist-area');
+  wa.style.display=item.repair==='기장허리'?'block':'none';
+  document.getElementById('waist-txt').value=cur.waistRepair||'';
+  document.getElementById('rep-popup').style.display='flex';
+}
+
+function adjInch(id,d){
+  var el=document.getElementById(id);
+  var v=parseFloat(el.value)||0;
+  el.value=Math.round((v+d)*4)/4;
+}
+function selDir(groupId,el,dir){
+  document.querySelectorAll('#'+groupId+' .dir-btn').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+}
+function getDir(groupId){
+  var a=document.querySelector('#'+groupId+' .dir-btn.on');
+  return a?a.textContent:'줄임';
+}
+function confirmRep(){
+  var dir=getDir('rep-dirs');
+  var inch=document.getElementById('rep-inch').value;
+  var repair=dir==='수선안함'?'수선안함':inch+'인치'+dir;
+  var waist=document.getElementById('waist-area').style.display!=='none'?document.getElementById('waist-txt').value:'';
+  if(waist) repair+=' / 허리:'+waist;
+  if(repMode==='set'){
+    if(pendingItems[repTargetIdx]) pendingItems[repTargetIdx].repair=repair;
+    closeRep();
+    document.getElementById('sz-popup').style.display='flex';
+    szNext();
+  } else {
+    if(currentItems[repTargetIdx]){
+      currentItems[repTargetIdx].repair=repair;
+      currentItems[repTargetIdx].waistRepair=waist;
+    }
+    closeRep();
+    renderItems();calcTotal();
+  }
+}
+function closeRep(){document.getElementById('rep-popup').style.display='none';}
+
+// ===== 현재 입력 중인 품목 =====
+var currentItems=[];
+
+// ===== 최종확인 팝업 =====
+function openCF(){
+  var tb=document.getElementById('cf-body');
+  tb.innerHTML='';
+  pendingItems.forEach(function(it,i){
+    var itData=ITEMS.find(function(x){return x.code===it.code;});
+    var repHtml='';
+    if(itData&&(itData.repair==='기장'||itData.repair==='기장허리')){
+      var def='37';
+      repHtml='<div style="margin-top:4px;">'
+        +'<div style="font-size:10px;color:#C00000;margin-bottom:2px;">기장(inch)'+(itData.repair==='기장허리'?' + 허리':'')+'</div>'
+        +'<div style="display:flex;gap:3px;align-items:center;margin-bottom:3px;">'
+        +'<button onclick="adjInch(\'ci'+i+'\',-.25)" style="width:24px;height:24px;border:1px solid #ddd;border-radius:3px;font-size:10px;cursor:pointer;background:#fff;">-¼</button>'
+        +'<input id="ci'+i+'" type="text" value="'+def+'" style="width:42px;height:24px;text-align:center;border:1px solid #ddd;border-radius:3px;font-size:12px;">'
+        +'<button onclick="adjInch(\'ci'+i+'\',0.25)" style="width:24px;height:24px;border:1px solid #ddd;border-radius:3px;font-size:10px;cursor:pointer;background:#fff;">+¼</button>'
+        +'</div>'
+        +'<div style="display:flex;gap:3px;">'
+        +'<button id="cd'+i+'j" class="dir-btn on" style="flex:1;padding:3px;font-size:10px;" onclick="selCDir('+i+',this,\'줄임\')">줄임</button>'
+        +'<button id="cd'+i+'n" class="dir-btn" style="flex:1;padding:3px;font-size:10px;" onclick="selCDir('+i+',this,\'늘림\')">늘림</button>'
+        +'<button id="cd'+i+'x" class="dir-btn" style="flex:1;padding:3px;font-size:10px;" onclick="selCDir('+i+',this,\'수선안함\')">안함</button>'
+        +'</div>'
+        +(itData.repair==='기장허리'?'<input id="cw'+i+'" type="text" placeholder="허리수선" style="width:100%;height:22px;border:1px solid #ddd;border-radius:3px;padding:0 4px;font-size:10px;margin-top:3px;">':'')
+        +'</div>';
+    } else if(itData&&itData.repair==='sleeve'){
+      repHtml='<div style="margin-top:4px;">'
+        +'<div style="font-size:10px;color:#C55A11;margin-bottom:2px;">소매수선(선택,inch)</div>'
+        +'<div style="display:flex;gap:3px;align-items:center;margin-bottom:3px;">'
+        +'<button onclick="adjInch(\'ci'+i+'\',-.25)" style="width:24px;height:24px;border:1px solid #ddd;border-radius:3px;font-size:10px;cursor:pointer;background:#fff;">-¼</button>'
+        +'<input id="ci'+i+'" type="text" value="0" style="width:42px;height:24px;text-align:center;border:1px solid #ddd;border-radius:3px;font-size:12px;">'
+        +'<button onclick="adjInch(\'ci'+i+'\',0.25)" style="width:24px;height:24px;border:1px solid #ddd;border-radius:3px;font-size:10px;cursor:pointer;background:#fff;">+¼</button>'
+        +'</div>'
+        +'<div style="display:flex;gap:3px;">'
+        +'<button id="cd'+i+'j" class="dir-btn on" style="flex:1;padding:3px;font-size:10px;" onclick="selCDir('+i+',this,\'줄임\')">줄임</button>'
+        +'<button id="cd'+i+'n" class="dir-btn" style="flex:1;padding:3px;font-size:10px;" onclick="selCDir('+i+',this,\'늘림\')">늘림</button>'
+        +'<button id="cd'+i+'x" class="dir-btn" style="flex:1;padding:3px;font-size:10px;" onclick="selCDir('+i+',this,\'수선안함\')">안함</button>'
+        +'</div>'
+        +'</div>';
+    }
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><span class="stag '+(it.season==='동복'?'dong':'ha')+'">'+it.season+'</span></td>'
+      +'<td style="font-weight:700;">'+it.name+'</td>'
+      +'<td><b>'+it.size+'</b></td>'
+      +'<td><select class="qty-sel" id="cq'+i+'"><option value="1">1개</option><option value="2">2개</option><option value="3">3개</option></select></td>'
+      +'<td><div class="badge-tog"><button id="cb'+i+'y" class="on" onclick="togBadge('+i+',\'명\')">명</button><button id="cb'+i+'n" onclick="togBadge('+i+',\'X\')">X</button></div></td>'
+      +'<td>'+repHtml+'</td>';
+    tb.appendChild(tr);
+  });
+  document.getElementById('cf-popup').style.display='flex';
+}
+function selCDir(i,el,dir){
+  ['j','n','x'].forEach(function(k){var b=document.getElementById('cd'+i+k);if(b)b.classList.remove('on');});
+  el.classList.add('on');
+}
+function togBadge(i,v){
+  document.getElementById('cb'+i+'y').classList.toggle('on',v==='명');
+  document.getElementById('cb'+i+'n').classList.toggle('on',v==='X');
+  pendingItems[i].badge=v;
+}
+function applyCF(){
+  pendingItems.forEach(function(it,i){
+    it.qty=parseInt(document.getElementById('cq'+i).value)||1;
+    var itData=ITEMS.find(function(x){return x.code===it.code;});
+    if(itData&&(itData.repair==='기장'||itData.repair==='기장허리'||itData.repair==='sleeve')){
+      var inchEl=document.getElementById('ci'+i);
+      var inch=inchEl?inchEl.value:'0';
+      var dirEl=document.querySelector('#cd'+i+'j.on')||document.querySelector('#cd'+i+'n.on')||document.querySelector('#cd'+i+'x.on');
+      var dir=dirEl?dirEl.textContent:'줄임';
+      if(dir==='안함') dir='수선안함';
+      it.repair=dir==='수선안함'?'수선안함':inch+'인치'+dir;
+      if(itData.repair==='기장허리'){
+        var wEl=document.getElementById('cw'+i);
+        if(wEl&&wEl.value) it.repair+=' / 허리:'+wEl.value;
+      }
+    }
+    currentItems.push(it);
+  });
+  pendingItems=[];
+  closeCF();
+  renderItems();
+  calcTotal();
+}
+function closeCF(){document.getElementById('cf-popup').style.display='none';}
+
+// ===== 품목 렌더링 =====
+function renderItems(){
+  if(!currentItems.length){
+    document.getElementById('empty-msg').style.display='block';
+    document.getElementById('item-tbl').style.display='none';
+    selIdx=-1;
+    document.getElementById('btn-repair').disabled=true;
+    document.getElementById('btn-del').disabled=true;
+    return;
+  }
+  document.getElementById('empty-msg').style.display='none';
+  document.getElementById('item-tbl').style.display='table';
+  var support=document.getElementById('support').value;
+  document.getElementById('item-body').innerHTML=currentItems.map(function(it,i){
+    var price=calcItemPrice(it,support);
+    return '<tr onclick="selectItem('+i+')" ondblclick="openEdit('+i+')" class="'+(i===selIdx?'sel':'')+'">'
+      +'<td><span class="stag '+(it.season==='동복'?'dong':'ha')+'">'+it.season+'</span></td>'
+      +'<td style="font-weight:700;">'+it.name+(it.school!==document.getElementById('school').value?'<br><span style="font-size:10px;color:#888;">'+it.school+'</span>':'')+'</td>'
+      +'<td><b>'+it.size+'</b></td>'
+      +'<td>'+it.qty+'개</td>'
+      +'<td>'+(it.badge==='명'?'명':'X')+'</td>'
+      +'<td class="repair-txt">'+(it.repair||'-')+'</td>'
+      +'<td style="color:#1F4E79;font-weight:700;">'+price+'</td>'
+      +'</tr>';
+  }).join('');
+}
+function calcItemPrice(it,support){
+  if(support==='현물'&&it.type==='교복'){
+    if(it.qty<=1) return '0원';
+    return ((it.qty-1)*it.price).toLocaleString()+'원';
+  }
+  return (it.price*it.qty).toLocaleString()+'원';
+}
+function selectItem(idx){
+  selIdx=idx;
+  renderItems();
+  document.getElementById('btn-repair').disabled=false;
+  document.getElementById('btn-del').disabled=false;
+}
+function delSelected(){
+  if(selIdx<0) return;
+  if(confirm('삭제할까요?')){
+    currentItems.splice(selIdx,1);
+    selIdx=-1;
+    document.getElementById('btn-repair').disabled=true;
+    document.getElementById('btn-del').disabled=true;
+    renderItems();calcTotal();
+  }
+}
+
+// ===== 수선버튼 =====
+// openRepair는 위에 정의됨
+
+// ===== 계산 =====
+function calcTotal(){
+  var support=document.getElementById('support').value;
+  var edu=0,gym=0,badge=0;
+  currentItems.forEach(function(it){
+    if(it.type==='체육복') gym+=it.price*it.qty;
+    else {
+      if(support==='현물'){if(it.qty>1) edu+=(it.qty-1)*it.price;}
+      else edu+=it.price*it.qty;
+    }
+    if(it.badge==='명') badge+=3000;
+  });
+  var total=edu+gym+badge;
+  document.getElementById('c-edu').textContent=edu.toLocaleString()+'원';
+  document.getElementById('c-gym').textContent=gym.toLocaleString()+'원';
+  document.getElementById('c-sub').textContent=(edu+gym).toLocaleString()+'원';
+  document.getElementById('c-badge').textContent=badge.toLocaleString()+'원';
+  document.getElementById('c-total').textContent=total.toLocaleString()+'원';
+  document.getElementById('pay-amt').value=edu+gym||'';
+  document.getElementById('badge-amt').value=badge||'';
+  calcRemain();
+  renderItems();
+}
+function calcRemain(){
+  var total=parseInt((document.getElementById('c-total').textContent||'').replace(/[^0-9]/g,''))||0;
+  var paid=(parseInt(document.getElementById('pay-amt').value)||0)+(parseInt(document.getElementById('badge-amt').value)||0);
+  document.getElementById('c-remain').textContent=(total-paid).toLocaleString()+'원';
+}
+
+// ===== 결제 =====
+function selPay(el,m){
+  payMethod=m;
+  document.querySelectorAll('#pay-btns .pay-btn').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+}
+function selBPay(el,m){
+  bpayMethod=m;
+  document.querySelectorAll('#bpay-btns .bpay-btn').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+}
+
+// ===== 수정 팝업 =====
+function openEdit(idx){
+  editIdx=idx;
+  var it=currentItems[idx];
+  var itData=ITEMS.find(function(x){return x.code===it.code;});
+  var sc=document.getElementById('school').value;
+  document.getElementById('edit-title').textContent=it.season+' '+it.name+' 수정';
+  // 대체품목
+  var step=null;
+  (SCHOOL_SET[sc]||[]).forEach(function(s){if(s.code===it.code&&s.season===it.season)step=s;});
+  var altArea=document.getElementById('edit-alt-area');
+  if(step&&step.alt&&step.alt.length){
+    altArea.style.display='block';
+    var html='<button class="alt-btn'+(it.code===step.code?' on':'')+'" onclick="selEditAlt(this,\''+step.code+'\')">'+it.name+'</button>';
+    step.alt.forEach(function(ac){
+      var ai=ITEMS.find(function(x){return x.code===ac;});
+      if(ai) html+='<button class="alt-btn'+(it.code===ac?' on':'')+'" onclick="selEditAlt(this,\''+ac+'\')">'+ai.name+'</button>';
+    });
+    document.getElementById('edit-alt-btns').innerHTML=html;
+  } else altArea.style.display='none';
+  // 사이즈
+  var sizes=itData?itData.sizes:S5;
+  document.getElementById('edit-sz-grid').innerHTML=sizes.map(function(sz){
+    return '<button class="sz-btn'+(String(it.size)===String(sz)?' sel':'')+'" onclick="selEditSz(this,'+sz+')">'+sz+'</button>';
+  }).join('');
+  // 수량
+  editQty=it.qty;
+  document.querySelectorAll('#edit-qty-row .opt-btn').forEach(function(b,i){b.classList.toggle('on',(i+1)===editQty);});
+  // 명찰
+  editBadge=it.badge;
+  document.querySelectorAll('#edit-badge-row .opt-btn').forEach(function(b,i){b.classList.toggle('on',(i===0&&editBadge==='명')||(i===1&&editBadge==='X'));});
+  // 수선
+  var ra=document.getElementById('edit-rep-area');
+  var sa=document.getElementById('edit-sleeve-area');
+  if(itData&&itData.repair==='기장허리'){
+    ra.style.display='block';sa.style.display='none';
+    var inch=(it.repair&&it.repair!=='수선안함')?(it.repair.match(/[\d.]+/)||['37'])[0]:'37';
+    var dir=it.repair==='수선안함'?'수선안함':(it.repair&&it.repair.indexOf('늘림')>-1?'늘림':'줄임');
+    document.getElementById('edit-inch').value=inch;
+    document.querySelectorAll('#edit-rep-dirs .dir-btn').forEach(function(b){b.classList.toggle('on',b.textContent===dir);});
+    document.getElementById('edit-waist').value=it.waistRepair||'';
+  } else if(itData&&itData.repair==='기장'){
+    ra.style.display='block';sa.style.display='none';
+    var inch2=(it.repair&&it.repair!=='수선안함')?(it.repair.match(/[\d.]+/)||['37'])[0]:'37';
+    var dir2=it.repair==='수선안함'?'수선안함':(it.repair&&it.repair.indexOf('늘림')>-1?'늘림':'줄임');
+    document.getElementById('edit-inch').value=inch2;
+    document.querySelectorAll('#edit-rep-dirs .dir-btn').forEach(function(b){b.classList.toggle('on',b.textContent===dir2);});
+    document.getElementById('edit-waist').value='';
+  } else if(itData&&itData.repair==='sleeve'){
+    ra.style.display='none';sa.style.display='block';
+    var si=(it.repair&&it.repair!=='수선안함')?(it.repair.match(/[\d.]+/)||['0'])[0]:'0';
+    var sd=it.repair==='수선안함'?'수선안함':(it.repair&&it.repair.indexOf('늘림')>-1?'늘림':'줄임');
+    document.getElementById('edit-sleeve-inch').value=si;
+    document.querySelectorAll('#edit-sleeve-dirs .dir-btn').forEach(function(b){b.classList.toggle('on',b.textContent===sd);});
+  } else {ra.style.display='none';sa.style.display='none';}
+  document.getElementById('edit-popup').style.display='flex';
+}
+function selEditAlt(el,code){
+  document.querySelectorAll('#edit-alt-btns .alt-btn').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+  var item=ITEMS.find(function(x){return x.code===code;});
+  if(!item) return;
+  currentItems[editIdx].code=code;
+  currentItems[editIdx].name=item.name;
+  currentItems[editIdx].type=item.type;
+  var sc=document.getElementById('school').value;
+  currentItems[editIdx].price=getPrice(sc,currentItems[editIdx].season,code);
+  document.getElementById('edit-sz-grid').innerHTML=item.sizes.map(function(sz){
+    return '<button class="sz-btn" onclick="selEditSz(this,'+sz+')">'+sz+'</button>';
+  }).join('');
+}
+function selEditSz(el,sz){
+  document.querySelectorAll('#edit-sz-grid .sz-btn').forEach(function(b){b.classList.remove('sel');});
+  el.classList.add('sel');
+  currentItems[editIdx].size=sz;
+}
+function selEditQty(el,n){
+  editQty=n;
+  document.querySelectorAll('#edit-qty-row .opt-btn').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+}
+function selEditBadge(el,v){
+  editBadge=v;
+  document.querySelectorAll('#edit-badge-row .opt-btn').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+}
+function confirmEdit(){
+  var it=currentItems[editIdx];
+  it.qty=editQty;it.badge=editBadge;
+  var itData=ITEMS.find(function(x){return x.code===it.code;});
+  if(itData&&(itData.repair==='기장'||itData.repair==='기장허리')){
+    var dir=getDir('edit-rep-dirs');
+    var inch=document.getElementById('edit-inch').value;
+    it.repair=dir==='수선안함'?'수선안함':inch+'인치'+dir;
+    if(itData.repair==='기장허리'){
+      var w=document.getElementById('edit-waist').value;
+      it.waistRepair=w;
+      if(it.repair!=='수선안함'&&w) it.repair+=' / 허리:'+w;
+    }
+  } else if(itData&&itData.repair==='sleeve'){
+    var sdir=getDir('edit-sleeve-dirs');
+    var sinch=document.getElementById('edit-sleeve-inch').value;
+    it.repair=sdir==='수선안함'?'수선안함':sinch+'인치'+sdir;
+  }
+  closeEdit();renderItems();calcTotal();
+}
+function delEditItem(){
+  if(confirm('삭제할까요?')){
+    currentItems.splice(editIdx,1);
+    closeEdit();selIdx=-1;
+    document.getElementById('btn-repair').disabled=true;
+    document.getElementById('btn-del').disabled=true;
+    renderItems();calcTotal();
+  }
+}
+function closeEdit(){document.getElementById('edit-popup').style.display='none';}
+
+// ===== 개별추가 =====
+function openAddItem(){
+  addSz='';addQty=1;addBadge='명';
+  document.getElementById('add-popup').style.display='flex';
+  onAddItemChange();
+}
+function closeAdd(){document.getElementById('add-popup').style.display='none';}
+function onAddItemChange(){
+  var code=document.getElementById('add-item').value;
+  var item=ITEMS.find(function(x){return x.code===code;});
+  if(!item) return;
+  addSz='';
+  document.getElementById('add-sz-grid').innerHTML=item.sizes.map(function(sz){
+    return '<button class="sz-btn" onclick="selAddSz(this,'+sz+')">'+sz+'</button>';
+  }).join('');
+  document.getElementById('add-rep-box').style.display=(item.repair==='기장'||item.repair==='기장허리')?'block':'none';
+  document.querySelectorAll('#add-rep-dirs .dir-btn').forEach(function(b,i){b.classList.toggle('on',i===0);});
+}
+function selAddSz(el,sz){
+  document.querySelectorAll('#add-sz-grid .sz-btn').forEach(function(b){b.classList.remove('sel');});
+  el.classList.add('sel');addSz=sz;
+}
+function selAddQty(el,n){
+  addQty=n;
+  document.querySelectorAll('#add-qty-row .opt-btn').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+}
+function selAddBadge(el,v){
+  addBadge=v;
+  document.querySelectorAll('#add-badge-row .opt-btn').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+}
+function confirmAdd(){
+  if(!addSz){alert('사이즈를 선택해주세요');return;}
+  var code=document.getElementById('add-item').value;
+  var item=ITEMS.find(function(x){return x.code===code;});
+  var season=document.getElementById('add-season').value;
+  var sc=document.getElementById('add-school').value;
+  var repair='';
+  if(item&&(item.repair==='기장'||item.repair==='기장허리')){
+    var dir=getDir('add-rep-dirs');
+    var inch=document.getElementById('add-inch').value;
+    repair=dir==='수선안함'?'수선안함':inch+'인치'+dir;
+  }
+  currentItems.push({code:code,name:item.name,type:item.type,season:season,school:sc,size:addSz,qty:addQty,badge:addBadge,repair:repair,price:getPrice(sc,season,code)});
+  renderItems();calcTotal();closeAdd();
+}
+
+// ===== 저장 =====
+function saveOrder(){
+  var nm=document.getElementById('sname').value;
+  var sc=document.getElementById('school').value;
+  if(!sc||!nm){alert('학교와 이름은 필수입니다');return;}
+  if(!currentItems.length){alert('품목을 1개 이상 입력해주세요');return;}
+  var key=sc;
+  if(!counters[key]) counters[key]=0;
+  var s=SCHOOLS.find(function(x){return x.name===sc;});
+  var regnum=s.code+String(counters[key]+1).padStart(3,'0');
+  if(_editingRegnum) regnum=_editingRegnum;
+  else counters[key]++;
+  var order={
+    regnum:regnum,school:sc,
+    grade:document.getElementById('grade').value,
+    classnum:document.getElementById('classnum').value,
+    name:nm,
+    phone:'010-'+document.getElementById('phone').value,
+    support:document.getElementById('support').value,
+    delivery:document.getElementById('delivery').value,
+    note:document.getElementById('note').value,
+    items:currentItems.slice(),
+    payMethod:payMethod,bpayMethod:bpayMethod,
+    payAmount:document.getElementById('pay-amt').value,
+    badgeAmount:document.getElementById('badge-amt').value,
+    payType:document.getElementById('pay-type').value,
+    staff:document.getElementById('staff').value,
+    date:new Date().toLocaleString('ko-KR')
+  };
+  if(_editingIdx>=0){
+    orders[_editingIdx]=order;
+    addLog('수정',regnum,sc+' '+nm+' 품목'+order.items.length+'건');
+    alert('수정완료! 등록번호: '+regnum);
+    _editingRegnum=null;_editingIdx=-1;
+  } else {
+    orders.unshift(order);
+    if(orders.length>500) orders.pop();
+    addLog('신규',regnum,sc+' '+nm+' 품목'+order.items.length+'건');
+    alert('저장완료! 등록번호: '+regnum);
+  }
+  saveAll();
+  // DB에 저장 (비동기)
+  order._isEdit = (_editingIdx >= 0);
+  saveStudentToDB(order).then(function(ok){
+    if(ok) console.log('DB 저장 완료');
+    else console.warn('DB 저장 실패 - 로컬에는 저장됨');
+  });
+  renderRecent();resetAll();
+}
+function saveOnly(){saveOrder();}
+
+function resetAll(){
+  ['sname','note','staff','pay-amt','badge-amt','classnum'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('school').value='';
+  document.getElementById('phone').value='';
+  document.getElementById('regnum').textContent='-';
+  currentItems=[];selIdx=-1;payMethod='';bpayMethod='';
+  _editingRegnum=null;_editingIdx=-1;
+  document.getElementById('btn-repair').disabled=true;
+  document.getElementById('btn-del').disabled=true;
+  document.querySelectorAll('.pay-btn,.bpay-btn').forEach(function(b){b.classList.remove('on');});
+  selSupport('현물');
+  renderItems();calcTotal();
+}
+
+// ===== 최근접수 =====
+function renderRecent(){
+  if(!orders.length){document.getElementById('recent-list').innerHTML='<div style="color:#bbb;font-size:11px;">없음</div>';return;}
+  document.getElementById('recent-list').innerHTML=orders.slice(0,8).map(function(o,i){
+    return '<div class="recent-item" style="display:flex;justify-content:space-between;align-items:center;">'
+      +'<div ondblclick="loadOrder('+i+')" style="cursor:pointer;flex:1;">'
+      +'<div class="rn">'+o.regnum+' '+o.name+'</div>'
+      +'<div class="ri">'+o.school+' | 품목'+(o.items?o.items.length:0)+'건</div>'
+      +'</div>'
+      +'<button class="btn btn-sm" style="background:#4B2D83;color:#fff;" onclick="loadOrder('+i+')">수정</button>'
+      +'</div>';
+  }).join('');
+}
+function loadOrder(idx){
+  var o=orders[idx];
+  if(!o) return;
+  document.getElementById('school').value=o.school||'';
+  onSchoolChange();
+  document.getElementById('grade').value=o.grade||'1';
+  document.getElementById('classnum').value=o.classnum||'';
+  document.getElementById('sname').value=o.name||'';
+  document.getElementById('phone').value=(o.phone||'').replace('010-','');
+  document.getElementById('note').value=o.note||'';
+  document.getElementById('delivery').value=o.delivery||'매장납품';
+  document.getElementById('regnum').textContent=o.regnum;
+  selSupport(o.support||'현물');
+  currentItems=o.items?o.items.slice():[];
+  document.getElementById('pay-amt').value=o.payAmount||'';
+  document.getElementById('badge-amt').value=o.badgeAmount||'';
+  document.getElementById('staff').value=o.staff||'';
+  payMethod=o.payMethod||'';bpayMethod=o.bpayMethod||'';
+  document.querySelectorAll('#pay-btns .pay-btn').forEach(function(b){b.classList.toggle('on',b.textContent===payMethod);});
+  document.querySelectorAll('#bpay-btns .bpay-btn').forEach(function(b){b.classList.toggle('on',b.textContent===bpayMethod);});
+  _editingRegnum=o.regnum;_editingIdx=idx;
+  renderItems();calcTotal();
+  alert(o.regnum+' '+o.name+' 불러왔습니다. 수정 후 저장하세요.');
+}
+
+// ===== 검색 =====
+function openSearch(){document.getElementById('srch-popup').style.display='flex';}
+function closeSrch(){document.getElementById('srch-popup').style.display='none';}
+async function doSearch(){
+  var q=document.getElementById('srch-q').value.trim();
+  if(!q) return;
+  document.getElementById('srch-result').innerHTML='<div style="color:#888;">검색 중...</div>';
+  
+  // DB에서 먼저 검색
+  var dbResults = await searchFromDB(q);
+  
+  // 로컬에서도 검색
+  var localFound=orders.filter(function(o){return o.regnum.includes(q)||o.name.includes(q)||(o.phone&&o.phone.includes(q));});
+  
+  // DB 결과를 orders에 없으면 추가
+  dbResults.forEach(function(dbStudent) {
+    var exists = orders.find(function(o){return o.regnum===dbStudent.regnum;});
+    if(!exists) {
+      orders.unshift({
+        regnum: dbStudent.regnum,
+        school: dbStudent.school,
+        grade: dbStudent.grade,
+        classnum: dbStudent.classnum,
+        name: dbStudent.name,
+        phone: dbStudent.phone,
+        support: dbStudent.support,
+        delivery: dbStudent.delivery,
+        note: dbStudent.note,
+        staff: dbStudent.staff,
+        items: [],
+        payMethod: '',
+        payAmount: 0,
+        date: dbStudent.created_at
+      });
+    }
+  });
+  
+  var found=orders.filter(function(o){return o.regnum.includes(q)||o.name.includes(q)||(o.phone&&o.phone.includes(q));});
+  
+  if(!found.length){document.getElementById('srch-result').innerHTML='<div style="color:#bbb;">검색 결과 없음</div>';return;}
+  document.getElementById('srch-result').innerHTML=found.map(function(o){
+    var realIdx=orders.indexOf(o);
+    return '<div style="padding:8px;border:1px solid #eee;border-radius:6px;margin-bottom:6px;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;">'
+      +'<b style="color:#1F4E79;">'+o.regnum+'</b>'
+      +'<button class="btn btn-sm" style="background:#4B2D83;color:#fff;" onclick="loadOrder('+realIdx+');closeSrch();">수정불러오기</button>'
+      +'</div>'
+      +'<div>'+o.name+' / '+o.school+' / '+o.grade+'학년</div>'
+      +'<div style="font-size:11px;color:#888;">'+(o.phone||'')+' | '+(o.date||'')+'</div>'
+      +'<div style="font-size:11px;color:#555;">품목 '+(o.items?o.items.length:0)+'건 | '+(o.payMethod||'-')+' '+Number(o.payAmount||0).toLocaleString()+'원</div>'
+      +'</div>';
+  }).join('');
+}
+
+// ===== 로그 =====
+function showLog(){
+  document.getElementById('log-cnt').textContent='총 '+actionLog.length+'건';
+  document.getElementById('log-body').innerHTML=actionLog.slice().reverse().map(function(l){
+    var bg=l.type==='신규'?'#E6F1FB':l.type==='수정'?'#FFF8DC':'#f9f9f9';
+    return '<tr style="background:'+bg+';">'
+      +'<td style="padding:5px 8px;font-size:11px;color:#666;">'+l.time+'</td>'
+      +'<td style="padding:5px 8px;font-weight:700;color:'+(l.type==='신규'?'#1F4E79':'#856404')+';">'+l.type+'</td>'
+      +'<td style="padding:5px 8px;font-weight:700;">'+l.regnum+'</td>'
+      +'<td style="padding:5px 8px;">'+l.detail+'</td>'
+      +'<td style="padding:5px 8px;">'+l.staff+'</td>'
+      +'</tr>';
+  }).join('');
+  document.getElementById('log-popup').style.display='flex';
+}
+function closeLog(){document.getElementById('log-popup').style.display='none';}
+
+// ===== 엑셀 다운 =====
+async function downloadExcel(){
+  // DB에서 전체 데이터 로드
+  var statusEl = document.getElementById('c-total');
+  var origText = statusEl.textContent;
+  statusEl.textContent = '로딩중...';
+  try {
+    var dbData = await loadAllFromDB();
+    if(dbData && dbData.students.length > orders.length) {
+      // DB 데이터가 더 많으면 DB 기준으로
+      console.log('DB에서 ' + dbData.students.length + '명 로드');
+    }
+  } catch(e) {}
+  statusEl.textContent = origText;
+  _downloadExcelCore();
+}
+function _downloadExcelCore(){
+  if(!orders.length){alert('저장된 데이터가 없습니다');return;}
+  function loadXLSX(cb){
+    if(typeof XLSX!=='undefined'){cb();return;}
+    var s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=cb;document.head.appendChild(s);
+  }
+  loadXLSX(function(){
+    var wb=XLSX.utils.book_new();
+    // 시트1: 요약
+    var sum=[['등록번호','학교','학년','반','이름','전화','지원방식','납품','동복요약','하복요약','명찰수','교복비','체육복비','명찰비','합계','결제방법','결제금액','선불후불','명찰결제','잔금','담당자','비고']];
+    orders.forEach(function(o){
+      var dong='',ha='',edu=0,gym=0,bcnt=0;
+      (o.items||[]).forEach(function(it){
+        var rep=it.repair&&it.repair!=='수선안함'?'('+it.repair+')':'';
+        var qty=it.qty>1?'x'+it.qty:'';
+        var e=it.name+' '+it.size+qty+rep;
+        if(it.season==='동복') dong+=(dong?', ':'')+e;
+        else ha+=(ha?', ':'')+e;
+        if(it.badge==='명') bcnt++;
+        if(it.type==='체육복') gym+=it.price*it.qty;
+        else{if(o.support==='현물'){if(it.qty>1)edu+=(it.qty-1)*it.price;}else edu+=it.price*it.qty;}
+      });
+      var bamt=parseInt(o.badgeAmount||0)||bcnt*3000;
+      var total=edu+gym+bamt;
+      var paid=parseInt(o.payAmount||0);
+      sum.push([o.regnum,o.school,o.grade,o.classnum,o.name,o.phone,o.support,o.delivery,dong,ha,bcnt,edu,gym,bamt,total,o.payMethod||'',paid,o.payType||'',o.bpayMethod||'',total-paid,o.staff||'',o.note||'']);
+    });
+    // 시트2: 상세
+    var det=[['등록번호','학교','이름','전화','지원방식','시즌','품목코드','품목명','사이즈','수량','명찰','수선','금액']];
+    orders.forEach(function(o){
+      (o.items||[]).forEach(function(it){
+        det.push([o.regnum,o.school,o.name,o.phone,o.support,it.season,it.code,it.name,it.size,it.qty,it.badge,it.repair||'',it.price*it.qty]);
+      });
+    });
+    // 시트3: 로그
+    var log=[['시간','구분','등록번호','내용','담당자']];
+    actionLog.forEach(function(l){log.push([l.time,l.type,l.regnum,l.detail,l.staff]);});
+    var ws1=XLSX.utils.aoa_to_sheet(sum);
+    var ws2=XLSX.utils.aoa_to_sheet(det);
+    var ws3=XLSX.utils.aoa_to_sheet(log);
+    ws1['!cols']=[{wch:8},{wch:10},{wch:5},{wch:5},{wch:8},{wch:14},{wch:8},{wch:8},{wch:40},{wch:30},{wch:6},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:6},{wch:6},{wch:8},{wch:8},{wch:15}];
+    ws2['!cols']=[{wch:8},{wch:10},{wch:8},{wch:14},{wch:8},{wch:6},{wch:6},{wch:12},{wch:8},{wch:5},{wch:5},{wch:20},{wch:8}];
+    ws3['!cols']=[{wch:18},{wch:6},{wch:8},{wch:30},{wch:8}];
+    XLSX.utils.book_append_sheet(wb,ws1,'주문요약');
+    XLSX.utils.book_append_sheet(wb,ws2,'주문상세');
+    XLSX.utils.book_append_sheet(wb,ws3,'로그');
+    var now=new Date();
+    var d=now.getFullYear()+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0');
+    XLSX.writeFile(wb,'주문내역_'+d+'.xlsx');
+  });
+}
+
+init();
+</script>
+</body>
+</html>
